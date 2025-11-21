@@ -16,7 +16,7 @@ const SeatSelection = () => {
       { row, seats }: { row: string; seats: number }
     ) => {
       acc[row] = Array.from({ length: seats }).map((_, i) => {
-        const id = `${row}${i}`
+        const id = `${row}${i + 1}`
         const isBooked = reservedSeats[id] !== undefined
 
         return {
@@ -59,6 +59,7 @@ const SeatSelection = () => {
               {seats[row]?.map((seat) => (
                 <button
                   key={seat.id}
+                  /* @todo: Handle seat selection */
                   onClick={() => null}
                   disabled={seat.status === "booked"}
                   className={`w-8 h-8 rounded-t-lg transition-colors ${getSeatColor(

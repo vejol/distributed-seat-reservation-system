@@ -16,11 +16,10 @@ interface GetMoviesResponse {
 }
 
 const SingleMovie = () => {
-  const params = useParams()
+  const { movies: movieId } = useParams()
   const { data: movie } = useQuery<GetMoviesResponse>({
-    queryKey: ["movies", params.movies],
-    queryFn: () =>
-      fetch(`/api/movies/${params.movies}`).then((res) => res.json()),
+    queryKey: ["movies", movieId],
+    queryFn: () => fetch(`/api/movies/${movieId}`).then((res) => res.json()),
   })
 
   if (!movie) {
