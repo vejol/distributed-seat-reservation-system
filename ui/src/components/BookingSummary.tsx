@@ -1,25 +1,40 @@
-import type { Seat } from "../types"
+import { useGetShowtimeByParamId } from "../api/movies"
 
-interface Props {
-  seats: Seat[]
-}
+interface Props {}
 
-const BookingSummary = ({ seats }: Props) => {
-  const selectedSeats = seats.filter((seat) => seat.status === "selected")
+const BookingSummary = ({}: Props) => {
+  const { data: showtimes } = useGetShowtimeByParamId()
+  const price = showtimes?.price ?? 0
 
-  const totalPrice = selectedSeats.reduce(
-    (sum, seat) => sum + (seat.price || 0),
-    0
-  )
+  const selectedSeats = [
+    { id: "A1", price: 10 },
+    { id: "A2", price: 10 },
+  ]
+
   return (
     <section className="lg:col-span-1 bg-white rounded-lg shadow-lg p-6 h-fit space-y-8">
       <h2 className="text-xl font-bold text-slate-800">Booking Summary</h2>
 
       <div className="space-y-2">
         <p className="font-bold">Show</p>
-        <p>Back to the future</p>
-        <p className="text-slate-600">13.11.2025</p>
-        <p className="text-slate-600">19.00 - 21.45</p>
+        <p>{showtimes?.movie?.title}</p>
+        <p className="text-slate-600">
+          {new Date(showtimes?.time ?? "").toLocaleDateString("fi-FI")}
+        </p>
+        <p className="text-slate-600">
+          {new Date(showtimes?.time ?? "").toLocaleTimeString("fi-FI", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+          {` - `}
+          {new Date(
+            new Date(showtimes?.time ?? "").getTime() +
+              (showtimes?.movie?.duration ?? 0) * 60000
+          ).toLocaleTimeString("fi-FI", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -53,7 +68,7 @@ const BookingSummary = ({ seats }: Props) => {
       <div className="flex justify-between items-center">
         <span className="text-xl font-bold text-slate-800">Total:</span>
         <span className="text-xl font-bold text-indigo-500">
-          {totalPrice} €
+          {selectedSeats.length * price} €
         </span>
       </div>
 

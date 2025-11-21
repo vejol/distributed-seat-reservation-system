@@ -5,7 +5,7 @@
             "name": "Kumpula Premium 1",
             "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
             "theaterNumber": 1,
-            "seatingCapacity": 100,
+            "seatingCapacity": 80,
             "seats": {
                 "rows": [
                     {"row": "A", "seats": 10},
@@ -24,7 +24,7 @@
             "name": "Kumpula Premium 2",
             "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
             "theaterNumber": 2,
-            "seatingCapacity": 80,
+            "seatingCapacity": 60,
             "seats": {
                 "rows": [
                     {"row": "A", "seats": 10},
@@ -41,7 +41,7 @@
             "name": "Sali 3",
             "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
             "theaterNumber": 3,
-            "seatingCapacity": 60,
+            "seatingCapacity": 48,
             "seats": {
                 "rows": [
                     {"row": "A", "seats": 6},
