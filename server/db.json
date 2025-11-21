@@ -1,0 +1,156 @@
+{
+    "theaters": [
+        {
+            "id": 1,
+            "name": "Kumpula Premium 1",
+            "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
+            "theaterNumber": 1,
+            "seatingCapacity": 100,
+            "seats": {
+                "rows": [
+                    {"row": "A", "seats": 10},
+                    {"row": "B", "seats": 10},
+                    {"row": "C", "seats": 10},
+                    {"row": "D", "seats": 10},
+                    {"row": "E", "seats": 10},
+                    {"row": "F", "seats": 10},
+                    {"row": "G", "seats": 10},
+                    {"row": "H", "seats": 10}
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "name": "Kumpula Premium 2",
+            "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
+            "theaterNumber": 2,
+            "seatingCapacity": 80,
+            "seats": {
+                "rows": [
+                    {"row": "A", "seats": 10},
+                    {"row": "B", "seats": 10},
+                    {"row": "C", "seats": 10},
+                    {"row": "D", "seats": 10},
+                    {"row": "E", "seats": 10},
+                    {"row": "F", "seats": 10}
+                ]
+            }
+        },
+        {
+            "id": 3,
+            "name": "Sali 3",
+            "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
+            "theaterNumber": 3,
+            "seatingCapacity": 60,
+            "seats": {
+                "rows": [
+                    {"row": "A", "seats": 6},
+                    {"row": "B", "seats": 6},
+                    {"row": "C", "seats": 6},
+                    {"row": "D", "seats": 6},
+                    {"row": "E", "seats": 6},
+                    {"row": "F", "seats": 6},
+                    {"row": "G", "seats": 6},
+                    {"row": "H", "seats": 6}
+                ]
+            }
+        },
+        {
+            "id": 4,
+            "name": "Testi Kumpula",
+            "location": ["Kinopalatsi", "Kumpula Campus", "Helsinki", "Finland"],
+            "theaterNumber": 4,
+            "seatingCapacity": 4,
+            "seats": {
+                "rows": [
+                    {"row": "A", "seats": 2},
+                    {"row": "B", "seats": 2}
+                ]
+            }
+        }
+    ],
+    "movies": [
+        {
+            "id": 1,
+            "title": "Inception",
+            "duration": 148,
+            "genre": ["Action", "Sci-Fi"],
+            "director": "Christopher Nolan",
+            "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Ellen Page"],
+            "language": ["English", "Finnish subtitles"],
+            "advisory": {"ageLimit": 12, "content": ["Violence"]}
+        },
+        {
+            "id": 2,
+            "title": "The Matrix",
+            "duration": 136,
+            "genre": ["Action", "Sci-Fi"],
+            "director": "The Wachowskis",
+            "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+            "language": ["English", "Finnish subtitles"],
+            "advisory": {"ageLimit": 16, "content": ["Violence", "Mature themes"]}
+        },
+        {
+            "id": 3,
+            "title": "Interstellar",
+            "duration": 169,
+            "genre": ["Adventure", "Drama", "Sci-Fi"],
+            "director": "Christopher Nolan",
+            "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
+            "language": ["English", "Finnish subtitles"],
+            "advisory": {"ageLimit": 10, "content": ["Mild language"]}
+        },
+        {
+            "id": 4,
+            "title": "Spirited Away",
+            "duration": 125,
+            "genre": ["Animation", "Fantasy"],
+            "director": "Hayao Miyazaki",
+            "cast": ["Rumi Hiiragi", "Miyu Irino", "Mari Natsuki"],
+            "language": ["Japanese", "Finnish subtitles"],
+            "advisory": {"ageLimit": 7, "content": []}
+        }
+    ],
+    "showtimes": [
+        {
+            "id": 1,
+            "movieId": 1,
+            "theaterId": 1,
+            "time": "2024-07-01T19:00:00",
+            "price": 12.50,
+            "reservedSeats": {
+                "A1": { "paid": true, "ttl": "2024-06-30T18:00:00" },
+                "A2": { "paid": false, "ttl": "2024-07-01T18:30:00" },
+                "B5": { "paid": true, "ttl": "2024-07-01T18:00:00" }
+            }
+        },
+        {
+            "id": 2,
+            "movieId": 2,
+            "theaterId": 2,
+            "time": "2024-07-01T21:00:00",
+            "price": 11.00,
+            "reservedSeats": {
+                "D4": { "paid": false, "ttl": "2024-07-01T20:30:00" }
+            }
+        },
+        {
+            "id": 3,
+            "movieId": 3,
+            "theaterId": 3,
+            "time": "2024-07-02T18:00:00",
+            "price": 13.00,
+            "reservedSeats": {
+                "B1": { "paid": true, "ttl": "2024-07-01T17:00:00" }
+            }
+        },
+        {
+            "id": 4,
+            "movieId": 4,
+            "theaterId": 4,
+            "time": "2024-07-02T20:00:00",
+            "price": 12.50,
+            "reservedSeats": {}
+        }
+    ]
+}
