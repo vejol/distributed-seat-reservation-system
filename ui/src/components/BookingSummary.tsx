@@ -1,15 +1,11 @@
 import { useGetShowtimeByParamId } from "../api/movies"
 
-interface Props {}
-
-const BookingSummary = ({}: Props) => {
+const BookingSummary = () => {
   const { data: showtimes } = useGetShowtimeByParamId()
   const price = showtimes?.price ?? 0
 
-  const selectedSeats = [
-    { id: "A1", price: 10 },
-    { id: "A2", price: 10 },
-  ]
+  // @todo: Apply selected seats from state management
+  const selectedSeats: Array<{ id: string; price: number }> = []
 
   return (
     <section className="lg:col-span-1 bg-white rounded-lg shadow-lg p-6 h-fit space-y-8">

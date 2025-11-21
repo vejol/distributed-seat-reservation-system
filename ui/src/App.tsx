@@ -1,10 +1,6 @@
+// @todo: Placeholder for Home page
 function App() {
-  return (
-    <>
-      Hello worldfrom App.tsx
-      <p>asd</p>
-    </>
-  )
+  return <></>
 }
 
 export default App
