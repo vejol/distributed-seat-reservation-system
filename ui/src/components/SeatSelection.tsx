@@ -2,8 +2,15 @@ import type { Seat, SeatStatus } from "../types"
 import Screen from "./Screen"
 import SeatInformation from "./SeatInformation"
 import { useGetShowtimeByParamId } from "../api/movies"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
+interface ShowtimeReserveResponse {
+  message: string
+}
 
 const SeatSelection = () => {
+  const queryClient = useQueryClient()
+
   const { data: showtimes } = useGetShowtimeByParamId()
 
   const reservedSeats = showtimes?.reservedSeats ?? {}
@@ -22,13 +29,35 @@ const SeatSelection = () => {
         return {
           id,
           row,
-          number: i,
+          number: i + 1,
           status: isBooked ? "booked" : "available",
         }
       })
       return acc
     },
     {}
+  )
+
+  const reserveMutation = useMutation<ShowtimeReserveResponse, unknown, string>(
+    {
+      mutationFn: async (seatId) => {
+        console.log(`/api/showtimes/${showtimes?.id}/reserve?seatId=${seatId}`)
+
+        const res = await fetch(
+          `/api/showtimes/${showtimes?.id}/reserve?seatId=${seatId}`,
+          {
+            method: "POST",
+          }
+        )
+
+        return await res.json()
+      },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["showtimes", String(showtimes?.id)],
+        })
+      },
+    }
   )
 
   const getSeatColor = (status: SeatStatus) => {
@@ -59,8 +88,8 @@ const SeatSelection = () => {
               {seats[row]?.map((seat) => (
                 <button
                   key={seat.id}
-                  /* @todo: Handle seat selection */
-                  onClick={() => null}
+                  type="button"
+                  onClick={() => reserveMutation.mutate(seat.id)}
                   disabled={seat.status === "booked"}
                   className={`w-8 h-8 rounded-t-lg transition-colors ${getSeatColor(
                     seat.status

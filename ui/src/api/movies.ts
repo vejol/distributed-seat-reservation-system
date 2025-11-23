@@ -32,10 +32,11 @@ interface GetShowtimeResponse {
 }
 
 export const useGetShowtimeByParamId = () => {
-  const { movies: movieId } = useParams<{ movies: string }>()
+  const { movies: showtimeId } = useParams<{ movies: string }>()
   const query = useQuery<GetShowtimeResponse>({
-    queryKey: ["showtimes", movieId],
-    queryFn: () => fetch(`/api/showtimes/${movieId}`).then((res) => res.json()),
+    queryKey: ["showtimes", showtimeId],
+    queryFn: () =>
+      fetch(`/api/showtimes/${showtimeId}`).then((res) => res.json()),
   })
   return query
 }
