@@ -36,6 +36,8 @@ Below are the steps for running three Raft nodes locally on your machine.
    - A virtual environment keeps the project's dependencies isolated from global packages.
 2. Activate the environment:  
    `source raft-node/venv/bin/activate`
+3. Install the dependencies:
+   `pip install -r raft-node/requirements.txt`
 
 ---
 
@@ -61,7 +63,7 @@ Each node follows this logic:
 To run three nodes with a shared replicated state:
 
 1. Open **three separate terminal windows**.
-2. In each terminal, navigate to the cloned repository.
+2. In each terminal, navigate to the cloned repository and activate the virtual environment with `source raft-node/venv/bin/activate`
 3. Start the `counter.py` script with different port parameters:
 
    - Terminal 1:  
