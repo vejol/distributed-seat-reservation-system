@@ -5,13 +5,14 @@ from functools import partial
 sys.path.append("../")
 from pysyncobj import SyncObj, replicated
 
-ReservedSeats = dict[str, dict[str, int]]
+ReservedSeats = dict[int, dict[str, int]] 
+#TODO: change key to str
 
 class MyCounter(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
         super(MyCounter, self).__init__(selfNodeAddr, otherNodeAddrs)
         self.__reservedSeats: ReservedSeats = {
-            "A1": { "user": 123 }
+            # example: 1: { "user": 123 }
         }
 
     @replicated
@@ -32,26 +33,31 @@ if __name__ == '__main__':
     node = MyCounter('localhost:%d' % port, partners)
 
     print('\n--- Interactive Console ---')
-    print('Commands: **reserve**, **cancel**, **get**, **exit**')
+    print('Commands: **reserve**, **get**, **exit**') # TODO: implement **cancel**
 
     while True:
         try:
             command = input().strip().lower()
 
             if command == 'reserve':
-                print('Which seat would you like to book? (enter a seat number or write "exit")')
-                while True:
-                    userInput = input().strip()
-                    if userInput.lower() == 'exit':
-                        print('Exiting seat reservation.')
-                        break
-                    try:
-                        val = int(userInput)
-                        node.reserveSeat('THEKEY', val)
-                        print(f'Seat {val} reserved!')
-                        break
-                    except ValueError:
-                        print('Please enter a number. (enter a seat number or write "exit")')
+                print('Who is reserving? (enter a name or write "exit")')
+                userName = input().strip()
+                if userName.lower() == 'exit':
+                    print('Seat reservation canceled. Enter next command.')
+                else:
+                    print('Which seat would you like to book? (enter a seat number or write "exit")')
+                    while True:
+                        userInput = input().strip()
+                        if userInput.lower() == 'exit':
+                            print('Seat reservation canceled. Enter next command.')
+                            break
+                        try:
+                            val = int(userInput)
+                            node.reserveSeat(val, {userName: 123}) #TODO: change hardcoded 123 to something meaningful
+                            print(f'Seat {val} reserved!')
+                            break
+                        except ValueError:
+                            print('Please enter a number. (enter a seat number or write "exit")')
             
             elif command == 'get':
                 value = node.getSeats()
