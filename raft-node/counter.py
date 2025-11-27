@@ -5,13 +5,17 @@ from functools import partial
 sys.path.append("../")
 from pysyncobj import SyncObj, replicated
 
+ReservedSeats = dict[str, dict[str, int]]
+
 class MyCounter(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
         super(MyCounter, self).__init__(selfNodeAddr, otherNodeAddrs)
-        self.__reservedSeats = {}
+        self.__reservedSeats: ReservedSeats = {
+            "A1": { "user": 123 }
+        }
 
     @replicated
-    def reserveSeat(self, key, value):
+    def reserveSeat(self, key: str, value: dict[str, int]):
         self.__reservedSeats[key] = value
         return self.__reservedSeats
 
