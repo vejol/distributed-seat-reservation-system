@@ -34,16 +34,37 @@ if __name__ == '__main__':
 
     port = int(sys.argv[1])
     partners = ['localhost:%d' % int(p) for p in sys.argv[2:]]
-    o = MyCounter('localhost:%d' % port, partners)
-    n = 0
-    old_value = -1
+    node = MyCounter('localhost:%d' % port, partners)
+
     while True:
-        time.sleep(0.5)
-        if o.getCounter() != old_value:
-            old_value = o.getCounter()
-            print(old_value)
-        if o._getLeader() is None:
-            continue
-        if n < 20:
-            o.addValue(10, n, callback=partial(onAdd, cnt=n))
-        n += 1
+        try:
+            # allow the cluster time to stabilise
+            time.sleep(0.5)
+
+            command = input().strip().lower()
+
+            if command == 'inc':
+                node.incCounter()
+                print('Replication call sent.')
+            
+            elif command == 'add':
+                print('Not implemented!')
+            
+            elif command == 'get':
+                value = node.getCounter()
+                print(f'Currect local counter value: {value}')
+            
+            elif command == 'exit':
+                print('Exiting.')
+                break
+
+            elif command:
+                print(f'Unknown command: "{command}"')
+    
+        except KeyboardInterrupt:
+            print('\nExiting on interrupt.')
+            break
+        except Exception as e:
+            print(f'An error occurred: {e}')
+            break
+    
