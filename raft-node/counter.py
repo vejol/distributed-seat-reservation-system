@@ -5,27 +5,22 @@ from functools import partial
 sys.path.append("../")
 from pysyncobj import SyncObj, replicated
 
+ReservedSeats = dict[str, dict[str, int]]
+
 class MyCounter(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
         super(MyCounter, self).__init__(selfNodeAddr, otherNodeAddrs)
-        self.__counter = 0
+        self.__reservedSeats: ReservedSeats = {
+            "A1": { "user": 123 }
+        }
 
     @replicated
-    def incCounter(self):
-        self.__counter += 1
-        return self.__counter
+    def reserveSeat(self, key: str, value: dict[str, int]):
+        self.__reservedSeats[key] = value
+        return self.__reservedSeats
 
-    @replicated
-    def addValue(self, value, cn):
-        self.__counter += value
-        return self.__counter, cn
-
-    def getCounter(self):
-        return self.__counter
-
-
-def onAdd(res, err, cnt):
-    print('onAdd %d:' % cnt, res, err)
+    def getSeats(self):
+        return self.__reservedSeats
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
@@ -36,23 +31,31 @@ if __name__ == '__main__':
     partners = ['localhost:%d' % int(p) for p in sys.argv[2:]]
     node = MyCounter('localhost:%d' % port, partners)
 
+    print('\n--- Interactive Console ---')
+    print('Commands: **reserve**, **cancel**, **get**, **exit**')
+
     while True:
         try:
-            # allow the cluster time to stabilise
-            time.sleep(0.5)
-
             command = input().strip().lower()
 
-            if command == 'inc':
-                node.incCounter()
-                print('Replication call sent.')
-            
-            elif command == 'add':
-                print('Not implemented!')
+            if command == 'reserve':
+                print('Which seat would you like to book? (enter a seat number or write "exit")')
+                while True:
+                    userInput = input().strip()
+                    if userInput.lower() == 'exit':
+                        print('Exiting seat reservation.')
+                        break
+                    try:
+                        val = int(userInput)
+                        node.reserveSeat('THEKEY', val)
+                        print(f'Seat {val} reserved!')
+                        break
+                    except ValueError:
+                        print('Please enter a number. (enter a seat number or write "exit")')
             
             elif command == 'get':
-                value = node.getCounter()
-                print(f'Currect local counter value: {value}')
+                value = node.getSeats()
+                print(f'Reserved seats: {value}')
             
             elif command == 'exit':
                 print('Exiting.')
