@@ -2,7 +2,7 @@
 
 ## How to Run the Raft Nodes Locally
 
-This project includes a simple distributed counter implemented with the
+This project includes a simple distributed seat reservation system implemented with the
 [PySyncObj](https://github.com/bakwc/PySyncObj) library.  
 Each instance acts as a Raft node that participates in leader election and state replication.
 
@@ -41,52 +41,36 @@ Below are the steps for running three Raft nodes locally on your machine.
 
 ---
 
-## 4. About the Example Counter Application
-
-The repository contains a simple counter example in **counter.py**.  
-It uses PySyncObj to maintain a replicated global state across the nodes.
-
-Each node follows this logic:
-
-- If **no leader** is elected yet → do nothing.
-- Once a **leader exists**:
-  - Run a loop 20 times:
-    - wait 0.5 seconds
-    - increment the global counter by 10
-    - print information about the performed increment (lines starting with `onAdd...`)
-- Print the current global counter value whenever it changes.
-
----
-
-## 5. Running the Nodes
+## 4. Running the Nodes
 
 To run three nodes with a shared replicated state:
 
 1. Open **three separate terminal windows**.
 2. In each terminal, navigate to the cloned repository and activate the virtual environment with `source raft-node/venv/bin/activate`
-3. Start the `counter.py` script with different port parameters:
+3. Start `main.py` in each terminal with a different node ID:
 
    - Terminal 1:  
-     `python3 raft-node/counter.py 3000 3001 3002`
+     `python3 raft-node/main.py --id 0`
    - Terminal 2:  
-     `python3 raft-node/counter.py 3001 3000 3002`
+     `python3 raft-node/main.py --id 1`
    - Terminal 3:  
-     `python3 raft-node/counter.py 3002 3000 3001`
+     `python3 raft-node/main.py --id 2`
 
-The script takes **three arguments**:
+### Required flag: `--id`
 
-1. the port on which the current node will run
-2. the port of the first partner node
-3. the port of the second partner node
+The `--id` flag is **mandatory**. It tells the program which node this process represents.  
+The value corresponds to the index of the node in the `config.json` file.
 
-This is why each node is started with a slightly different command.
+### Optional flag: `--config`
 
----
+The `--config` flag is **optional**.  
+If omitted, the program uses the configuration profile under the `"default"` key in `config.json`.
 
-## 6. Expected Output
+The `config.json` file may contain multiple profiles (e.g. `"default"`, `"localhost"`, `"docker"`, `"production"`).  
+You can choose a profile by passing its name via `--config`:
 
-After starting the second and third processes, all terminals should begin showing counter updates as the leader increments the shared value.
+Example:
 
-Here is an example of what the output may look like:
-
-![Console view of running counter.py in three separate console windows](documentation/counter-example.png)
+- Terminal 1:
+  `python3 raft-node/main.py --id 0 --config staging`
+- etc.

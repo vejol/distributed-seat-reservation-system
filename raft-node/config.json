@@ -1,0 +1,8 @@
+{
+  "default": ["localhost:6000", "localhost:6001", "localhost:6002"],
+  "staging": [
+    "svm-11.cs.helsinki.fi:6222",
+    "svm-11-2.cs.helsinki.fi:6222",
+    "svm-11-3.cs.helsinki.fi:6222"
+  ]
+}
