@@ -1,47 +1,66 @@
 from reservation_manager import ReservationManager
-
+import json
 
 def run_console(node: ReservationManager):
-    print("\n--- Interactive Console ---")
-    print("Commands: **reserve**, **get**, **exit**")  # TODO: implement **cancel**
+    print('\n--- Welcome to the Interactive Console! ---\n')
 
     while True:
+        print('Commands:\nadmin\nreserve-seat (not implemented)\ncancel-seat (not implemented)\nget-showtimes\nexit')
         try:
             command = input().strip().lower()
 
-            if command == "reserve":
-                print('Who is reserving? (enter a name or write "exit")')
-                userName = input().strip()
-                if userName.lower() == "exit":
-                    print("Seat reservation canceled. Enter next command.")
-                else:
-                    print(
-                        'Which seat would you like to book? (enter a seat number or write "exit")'
-                    )
-                    while True:
-                        userInput = input().strip()
-                        if userInput.lower() == "exit":
-                            print("Seat reservation canceled. Enter next command.")
-                            break
-                        try:
-                            val = int(userInput)
-                            node.reserveSeat(
-                                val, {userName: 123}
-                            )  # TODO: change hardcoded 123 to something meaningful
-                            print(f"Seat {val} reserved!")
-                            break
-                        except ValueError:
-                            print(
-                                'Please enter a number. (enter a seat number or write "exit")'
-                            )
+            if command == 'admin':
+                while True:
+                    print('Admin Commands\nadd-showtime\nremove-showtime (not implemented)\nexit-admin')
+                    command = input().strip().lower()
+                    if command == 'add-showtime':
+                        while True:
+                            print('Enter showtimeID (int | "cancel")')
+                            adminInput = input().strip().lower()
+                            if adminInput.lower() == 'cancel':
+                                print('Operation canceled.')
+                                break
+                            try:
+                                showtimeID = int(adminInput)
+                                print('Enter theater rows (list[dict[str, int]] | "cancel") (you can copy-paste from db.json)')
+                                adminInput = input().strip().lower()
+                                if adminInput.lower() == 'cancel':
+                                    print('Operation canceled.')
+                                    break
+                                try:
+                                    rows = json.loads(adminInput)
+                                    node.addShowtime(showtimeID, rows)
+                                    print('Showtime added successfully.')
+                                except json.JSONDecodeError:
+                                    print('Invalid input.')
+                                break
+                            except ValueError:
+                                print('Invalid input.')
 
-            elif command == "get":
-                value = node.getSeats()
-                print(f"Reserved seats: {value}")
+                    if command == 'remove-showtime':
+                        print(f'Oh no! This command is not implemented, yet.')
 
-            elif command == "exit":
+                    if command == 'exit-admin':
+                        break
+
+
+            if command == "reserve-seat":
+                print(f'Oh no! This command is not implemented, yet.')
+            
+            if command == "cancel-seat":
+                print(f'Oh no! This command is not implemented, yet.')
+
+            elif command == 'get-showtimes':
+                value = node.getShowtimes()
+                print(value)
+
+            elif command == 'exit':
                 print("Exiting.")
                 break
+        
+            elif command == 'exit-admin':
+                # configure this inside the admin loop
+                continue
 
             elif command:
                 print(f'Unknown command: "{command}"')
