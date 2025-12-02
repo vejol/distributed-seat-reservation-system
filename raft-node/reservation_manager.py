@@ -1,5 +1,6 @@
-from pysyncobj import SyncObj, replicated
+from pysyncobj import SyncObj, SyncObjConf, replicated
 from typing import TypedDict
+from itertools import iteritems
 
 ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, seatID: userID ... } } 
 # available seats have userID = None
@@ -8,7 +9,9 @@ TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
-        super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs)
+        # OPTIONAL: Define a journalFile (e.g. journalfile.bin) to have a FileJournal. Otherwise, a simple runtime MemoryJournal is created. See journal.py from the source code for details.
+        cfg = SyncObjConf(journalFile = None)
+        super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, cfg)
         self.__activeShowtimes: ActiveShowtimes = {}
 
     def getFullState(self):
@@ -39,12 +42,6 @@ class ReservationManager(SyncObj):
             'success': True,
             'message': f'Showtime {showtimeID} successfully added!'
         }
-
-    @replicated
-    def removeShowtime(self, showtimeID: int):
-        #TODO
-        self.__activeShowtimes.pop(showtimeID)
-        return self.__activeShowtimes
 
     def getShowtimes(self):
         return list(self.__activeShowtimes.keys())
@@ -96,11 +93,42 @@ class ReservationManager(SyncObj):
             }
 
         return availableSeats
+
+    def getLogs(self):
+        return self.__raftLog
+    
+    # Adapted from getStatus(). See syncobj.py from the source code for details (or look below). Explanations from Ongaro & Ousterhout, 2014.
+    def getCustomStatus(self):
+        status = {}
+        status['self'] = self.selfNode
+        status['state'] = self.__raftState
+        status['leader'] = self.__raftLeader
+        status['has_quorum'] = self.hasQuorum
+        status['partner_nodes'] = self.__otherNodes
+        status['partner_nodes_count'] = len(self.__otherNodes)
+        status['raft_term'] = self.raftCurrentTerm # latest term server has seen
+        status['commit_idx'] = self.raftCommitIndex # index of highest log entry known to be committed
+        status['last_applied'] = self.raftLastApplied # index of highest log entry applied to state machine
+        for node, idx in self.__raftNextIndex.items():
+            status['next_node_idx_server_' + node.id] = idx # for each server, index of the next log entry to send to that server
+        for node, idx in self.__raftMatchIndex.items():
+            status['match_idx_server_' + node.id] = idx # for each server, index of highest log entry known to be replicated on server
+        status['leader_commit_idx'] = self.__leaderCommitIndex # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
+    
+
+
+    
+    @replicated
+    def removeShowtime(self, showtimeID: int):
+        #TODO add error handling
+        self.__activeShowtimes.pop(showtimeID)
+        return self.__activeShowtimes
     
     def getAvailableShowtimes(self):
         # TODO this should return showtimes that have at least one free seat
         return
     
+    @replicated
     def cancelSeat(self):
         # TODO
         return
@@ -111,3 +139,36 @@ class ReservationManager(SyncObj):
     
 # DEV NOTE: you can copy-paste the line below (taken from db.json) when using addShowtime
 # [{"row": "A","seats": 2},{"row": "B","seats": 2}]
+
+# self.__raftLog returns logs as a list
+
+# getStatus() from source code for reference
+""" def getStatus(self):
+    status = {}
+    status['version'] = VERSION
+    status['revision'] = 'deprecated'
+    status['self'] = self.selfNode
+    status['state'] = self.__raftState
+    status['leader'] = self.__raftLeader
+    status['has_quorum'] = self.hasQuorum
+    status['partner_nodes_count'] = len(self.__otherNodes)
+    for node in self.__otherNodes:
+        status['partner_node_status_server_' + node.id] = 2 if self.isNodeConnected(node) else 0
+    status['readonly_nodes_count'] = len(self.__readonlyNodes)
+    for node in self.__readonlyNodes:
+        status['readonly_node_status_server_' + node.id] = 2 if self.isNodeConnected(node) else 0
+    status['log_len'] = len(self.__raftLog)
+    status['last_applied'] = self.raftLastApplied
+    status['commit_idx'] = self.raftCommitIndex
+    status['raft_term'] = self.raftCurrentTerm
+    status['next_node_idx_count'] = len(self.__raftNextIndex)
+    for node, idx in iteritems(self.__raftNextIndex):
+        status['next_node_idx_server_' + node.id] = idx
+    status['match_idx_count'] = len(self.__raftMatchIndex)
+    for node, idx in iteritems(self.__raftMatchIndex):
+        status['match_idx_server_' + node.id] = idx
+    status['leader_commit_idx'] = self.__leaderCommitIndex
+    status['uptime'] = int(monotonicTime() - self.__startTime)
+    status['self_code_version'] = self.__selfCodeVersion
+    status['enabled_code_version'] = self.__enabledCodeVersion
+    return status """
