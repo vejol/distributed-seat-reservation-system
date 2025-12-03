@@ -1,3 +1,4 @@
+from pathlib import Path
 from pysyncobj import SyncObj, SyncObjConf, replicated
 from typing import TypedDict
 
@@ -8,10 +9,18 @@ TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
-        # OPTIONAL: Define a journalFile (e.g. journalfile.bin) to have a FileJournal. Otherwise, a simple runtime MemoryJournal is created. See journal.py from the source code for details.
-        cfg = SyncObjConf(journalFile = None)
-        super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, cfg)
-        self.__activeShowtimes: ActiveShowtimes = {}
+
+        conf = SyncObjConf(
+            journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
+            fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
+            logCompactionMinTime=60,  # take snapshot in every 60 seconds
+            logCompactionMinEntries=5,  # take snapshot in every 5 entries
+        )
+
+        super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
+        self.__activeShowtimes: ActiveShowtimes = {
+            1: {"a1": None, "a2": None, "a3": None, "a4": None, "a5": None, "a6": None}
+        }
 
     def getFullState(self):
         return self.__activeShowtimes
@@ -136,6 +145,15 @@ class ReservationManager(SyncObj):
     def getSeats(self, showtimeID: int):
         # TODO
         return
+    
+    # Every node needs unique file names for journal and dump files.
+    # The id parameter is unique identifier of node. For example "localhost:6000"
+    # The keyword parameter describes the first word of the filename. For example "journal"
+    def _generateUniqueFileName(self, keyword, id):
+        path = Path(__file__).resolve().parent / "journal"
+        path.mkdir(parents=True, exist_ok=True)
+        safe_id = id.replace(":", "_")
+        return str(path / f"{keyword}-{safe_id}.bin")
     
 # DEV NOTE: you can copy-paste the line below (taken from db.json) when using addShowtime
 # [{"row": "A","seats": 2},{"row": "B","seats": 2}]

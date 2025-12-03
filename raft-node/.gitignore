@@ -13,5 +13,4 @@ __pycache__/
 .vscode/
 
 # Raft logs
-journalfile.bin
-journalfile.bin.meta
+journal/
