@@ -1,12 +1,13 @@
 from reservation_manager import ReservationManager
 import json
+import pickle
 
 def run_console(node: ReservationManager):
     print('\n--- Welcome to the Interactive Console! ---')
 
     while True:
         commandGlobal = '' # this is used to exit nested loops after 'cancel' or successful operation
-        print('\n--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat (not implemented)\nget-showtimes\nget-full-state\nexit\n')
+        print('\n--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat (not implemented)\nget-showtimes\nget-full-state\nget-raw-logs\nget-logs (BETA)\nget-status\nexit\n')
         print('Enter a command:')
         try:
             command = input().strip().lower()
@@ -130,6 +131,50 @@ def run_console(node: ReservationManager):
             elif command == 'get-full-state':
                 all = node.getFullState()
                 print(all)
+
+            elif command == 'get-raw-logs':
+                raw_logs = node.getLogs()
+                for log in raw_logs:
+                    print(log)
+
+            elif command == 'get-logs':
+                FUNCTION_MAP = {
+                    0: 'addShowtime',
+                    3: 'reserveSeat'
+                    # TODO: Add other functions from reservation_manage.py
+                }
+
+                raw_log = node.getLogs()
+                print(f"{'IDX':<5} | {'TERM':<5} | {'DATA'}")
+                print("-" * 40)
+
+                for entry in raw_log:
+                    binary_data, index, term = entry
+
+                    if binary_data == b'\x01':
+                        decoded_data = '[Internal] No-Op / Heartbeat'
+                    
+                    elif binary_data.startswith(b'\x00'):
+                        try:
+                            decoded_data = pickle.loads(binary_data[1:]) # decoded_data is a 3-tuple
+                            function_name = FUNCTION_MAP.get(decoded_data[0], f'Unknown_ID_{decoded_data[0]}')
+                            if function_name == 'addShowtime': 
+                                decoded_data = f'{function_name}{decoded_data[1]}' # addShowtime has the arguments in decoded_data[1]
+                            elif function_name == 'reserveSeat':
+                                decoded_data = f'{function_name}({decoded_data[2]})' # reserveSeat has the arguments in decoded_data[2]
+                            else:
+                                decoded_data = f'{function_name}({decoded_data[1]})({decoded_data[2]})'
+                        except Exception as e:
+                            decoded_data = f'<Corrupt Data: {e}>'
+                    
+                    else:
+                        decoded_data = f'<Unknown Binary: {binary_data[:10]}...>'
+
+                    print(f'{index:<5} | {term:<5} | {decoded_data}')
+        
+            elif command == 'get-status':
+                status = node.getCustomStatus()
+                print(status)
 
             elif command == 'exit' or commandGlobal == 'exit': # the latter activated when admin exits
                 print("Exiting.")

@@ -1,6 +1,5 @@
 from pysyncobj import SyncObj, SyncObjConf, replicated
 from typing import TypedDict
-from itertools import iteritems
 
 ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, seatID: userID ... } } 
 # available seats have userID = None
@@ -95,25 +94,26 @@ class ReservationManager(SyncObj):
         return availableSeats
 
     def getLogs(self):
-        return self.__raftLog
+        return self._SyncObj__raftLog._MemoryJournal__journal
     
     # Adapted from getStatus(). See syncobj.py from the source code for details (or look below). Explanations from Ongaro & Ousterhout, 2014.
     def getCustomStatus(self):
         status = {}
         status['self'] = self.selfNode
-        status['state'] = self.__raftState
-        status['leader'] = self.__raftLeader
+        status['state'] = self._SyncObj__raftState
+        status['leader'] = self._SyncObj__raftLeader
         status['has_quorum'] = self.hasQuorum
-        status['partner_nodes'] = self.__otherNodes
-        status['partner_nodes_count'] = len(self.__otherNodes)
+        status['partner_nodes'] = self._SyncObj__otherNodes
+        status['partner_nodes_count'] = len(self._SyncObj__otherNodes)
         status['raft_term'] = self.raftCurrentTerm # latest term server has seen
         status['commit_idx'] = self.raftCommitIndex # index of highest log entry known to be committed
         status['last_applied'] = self.raftLastApplied # index of highest log entry applied to state machine
-        for node, idx in self.__raftNextIndex.items():
+        for node, idx in self._SyncObj__raftNextIndex.items():
             status['next_node_idx_server_' + node.id] = idx # for each server, index of the next log entry to send to that server
-        for node, idx in self.__raftMatchIndex.items():
+        for node, idx in self._SyncObj__raftMatchIndex.items():
             status['match_idx_server_' + node.id] = idx # for each server, index of highest log entry known to be replicated on server
-        status['leader_commit_idx'] = self.__leaderCommitIndex # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
+        status['leader_commit_idx'] = self._SyncObj__leaderCommitIndex # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
+        return(status)
     
 
 
