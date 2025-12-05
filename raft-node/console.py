@@ -52,19 +52,6 @@ def run_console(node: ReservationManager, selfId: int):
         else: # print() outputs an empty line without the prefix
             builtins.print(**kwargs)
 
-    print('\n--- Welcome to the Interactive Console! ---')
-def run_console(node: ReservationManager, selfId: int):
-    def print(*args, **kwargs):
-        prefix = f'[N{selfId}] ' # 'N' for 'Node'
-
-        sep = kwargs.get('sep', ' ')
-
-        if args:
-            builtins.print(prefix, end='')
-            builtins.print(*args, **kwargs)
-        else: # print() outputs an empty line without the prefix
-            builtins.print(**kwargs)
-
     print('--- Welcome to the Interactive Console! ---')
     time.sleep(0.1)
     print_seat_map(node.getFullState()[1])
