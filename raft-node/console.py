@@ -5,7 +5,49 @@ import pickle
 def run_console(node: ReservationManager):
     print('\n--- Welcome to the Interactive Console! ---')
 
+    def print_seat_map(seats: dict):
+        # Määritellään rivit ja sarakkeet (kirjaimet voi olla datassa pienellä)
+        rows = ["a", "b", "c", "d"]
+        cols = [1, 2, 3, 4, 5, 6]
+
+        # Ylärivin numerot
+        print("  ", end="")
+        for c in cols:
+            print(f"  {c}", end="")
+        print()
+
+        # Varsinaiset paikat
+        for row in rows:
+            row_label = row.upper()  # Tulostetaan A, B, C, D
+            print(f"{row_label}  ", end="")
+
+            for col in cols:
+                key = f"{row}{col}"          # esim. 'a1'
+                value = seats.get(key)
+                ch = " " if value is None else "x"
+                print(f"[{ch}]", end="")
+
+            print()  # rivinvaihto
+
+    def render_seat_map(rows: dict[str, dict[str, object]]) -> None:
+        # rows = { "A": {"A1": None, "A2": 123, ...}, "B": {...}, ... }
+        def seat_key(seat_id: str) -> int:
+            # lajittelee A1, A2, A10 numeron mukaan
+            num = ''.join(ch for ch in seat_id if ch.isdigit())
+            return int(num) if num else 0
+
+        for row_label in sorted(rows.keys()):  # rivit aakkosjärjestyksessä
+            seats = rows[row_label]
+            line = [row_label]  # rivin tunnus alkuun
+            for seat_id in sorted(seats.keys(), key=seat_key):
+                value = seats[seat_id]
+                reserved = bool(value)  # True/uid => varattu, None/False/0/"" => vapaa
+                line.append('[x]' if reserved else '[ ]')
+            print(' '.join(line))
+
     while True:
+        print(print_seat_map(node.getFullState()[1]))
+        #print(render_seat_map(node.getFullState()))
         commandGlobal = '' # this is used to exit nested loops after 'cancel' or successful operation
         print('\n--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat (not implemented)\nget-showtimes\nget-full-state\nget-raw-logs\nget-logs (BETA)\nget-status\nexit\n')
         print('Enter a command:')
@@ -193,3 +235,24 @@ def run_console(node: ReservationManager):
         except Exception as e:
             print(f"An error occurred: {e}")
             break
+
+def render_seat_map(rows: dict[str, dict[str, object]]) -> None:
+    # rows = { "A": {"A1": None, "A2": 123, ...}, "B": {...}, ... }
+    def seat_key(seat_id: str) -> int:
+        # lajittelee A1, A2, A10 numeron mukaan
+        num = ''.join(ch for ch in seat_id if ch.isdigit())
+        return int(num) if num else 0
+
+    for row_label in sorted(rows.keys()):  # rivit aakkosjärjestyksessä
+        seats = rows[row_label]
+        line = [row_label]  # rivin tunnus alkuun
+        for seat_id in sorted(seats.keys(), key=seat_key):
+            value = seats[seat_id]
+            reserved = bool(value)  # True/uid => varattu, None/False/0/"" => vapaa
+            line.append('[x]' if reserved else '[ ]')
+        print(' '.join(line))
+
+
+
+
+

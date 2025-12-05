@@ -19,7 +19,7 @@ class ReservationManager(SyncObj):
 
         super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
         self.__activeShowtimes: ActiveShowtimes = {
-            1: {"a1": None, "a2": None, "a3": None, "a4": None, "a5": None, "a6": None}
+            1: {'a1': None, 'a2': None, 'a3': None, 'a4': None, 'a5': None, 'a6': None, 'b1': None, 'b2': None, 'b3': None, 'b4': None, 'b5': None, 'b6': None, 'c1': None, 'c2': None, 'c3': None, 'c4': None, 'c5': None, 'c6': None, 'd1': None, 'd2': None, 'd3': None, 'd4': None, 'd5': None, 'd6': None}
         }
 
     def getFullState(self):
