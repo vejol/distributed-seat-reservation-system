@@ -4,12 +4,14 @@ from typing import TypedDict
 
 ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, seatID: userID ... } } 
 # available seats have userID = None
-TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
+
 # used in addShowTime, something for Application Servers to mind
+TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
     def __init__(self, selfNodeAddr, otherNodeAddrs):
 
+        # Select the latter journalFile setting to save snapshots to local memory
         conf = SyncObjConf(
             journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
             fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
@@ -50,6 +52,25 @@ class ReservationManager(SyncObj):
             'success': True,
             'message': f'Showtime {showtimeID} successfully added!'
         }
+    
+    @replicated
+    def removeShowtime(self, showtimeID: int):
+        if showtimeID not in self.__activeShowtimes:
+            return {
+                'success': False,
+                'message': f'ERROR: Showtime with ID {showtimeID} does not exist.'
+            }
+        try:
+            self.__activeShowtimes.pop(showtimeID)
+            return {
+                'success': True,
+                'message': f'Showtime {showtimeID} successfully removed!\nRemaining showtimes: {list(self.__activeShowtimes.keys())}'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'ERROR: {e}'
+            }
 
     def getShowtimes(self):
         return list(self.__activeShowtimes.keys())
@@ -81,6 +102,34 @@ class ReservationManager(SyncObj):
             'success': True,
             'message': f'Seat {seatID} for showtime {showtimeID} successfully reserved for user {userID}!',
         }
+    
+    @replicated
+    def cancelSeat(self, showtimeID: int, seatID: str):
+        if showtimeID not in self.__activeShowtimes:
+            return {
+                'success': False,
+                'message': f'ERROR: Showtime with ID {showtimeID} does not exist.',
+            }
+    
+        if seatID not in self.__activeShowtimes[showtimeID]:
+            return {
+                'success': False,
+                'message': f'ERROR: Seat with ID {seatID} does not exist in showtime {showtimeID}.',
+            }
+        
+        if self.__activeShowtimes[showtimeID][seatID] is None:
+            return {
+                'success': False,
+                'message': f'ERROR: Seat with ID {seatID} for show {showtimeID} is not reserved.',
+            }
+        
+        userID = self.__activeShowtimes[showtimeID][seatID]
+        self.__activeShowtimes[showtimeID][seatID] = None
+
+        return {
+            'success': True,
+            'message': f'Seat {seatID} for showtime {showtimeID} successfully canceled! (previously reserved by user {userID})',
+        }
 
     def getAvailableSeats(self, showtimeID: int):
         if showtimeID not in self.__activeShowtimes:
@@ -101,11 +150,32 @@ class ReservationManager(SyncObj):
             }
 
         return availableSeats
+    
+    def getReservedSeats(self, showtimeID: int):
+        if showtimeID not in self.__activeShowtimes:
+            return {
+                'success': False,
+                'message': f'ERROR: Showtime with ID {showtimeID} does not exist.'
+            }
+        
+        try:
+            availableSeats = []
+            for seatID, userID in self.__activeShowtimes[showtimeID].items():
+                if userID is not None:
+                    availableSeats.append(seatID)
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'ERROR: {e}'
+            }
 
+        return availableSeats
+
+    #TODO: BROKEN
     def getLogs(self):
         return self._SyncObj__raftLog._MemoryJournal__journal
     
-    # Adapted from getStatus(). See syncobj.py from the source code for details (or look below). Explanations from Ongaro & Ousterhout, 2014.
+    # Adapted from getStatus(). See syncobj.py from PySyncObj source code for details (or look below). Explanations from Ongaro & Ousterhout, 2014.
     def getCustomStatus(self):
         status = {}
         status['self'] = self.selfNode
@@ -124,28 +194,6 @@ class ReservationManager(SyncObj):
         status['leader_commit_idx'] = self._SyncObj__leaderCommitIndex # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
         return(status)
     
-
-
-    
-    @replicated
-    def removeShowtime(self, showtimeID: int):
-        #TODO add error handling
-        self.__activeShowtimes.pop(showtimeID)
-        return self.__activeShowtimes
-    
-    def getAvailableShowtimes(self):
-        # TODO this should return showtimes that have at least one free seat
-        return
-    
-    @replicated
-    def cancelSeat(self):
-        # TODO
-        return
-
-    def getSeats(self, showtimeID: int):
-        # TODO
-        return
-    
     # Every node needs unique file names for journal and dump files.
     # The id parameter is unique identifier of node. For example "localhost:6000"
     # The keyword parameter describes the first word of the filename. For example "journal"
@@ -159,34 +207,3 @@ class ReservationManager(SyncObj):
 # [{"row": "A","seats": 2},{"row": "B","seats": 2}]
 
 # self.__raftLog returns logs as a list
-
-# getStatus() from source code for reference
-""" def getStatus(self):
-    status = {}
-    status['version'] = VERSION
-    status['revision'] = 'deprecated'
-    status['self'] = self.selfNode
-    status['state'] = self.__raftState
-    status['leader'] = self.__raftLeader
-    status['has_quorum'] = self.hasQuorum
-    status['partner_nodes_count'] = len(self.__otherNodes)
-    for node in self.__otherNodes:
-        status['partner_node_status_server_' + node.id] = 2 if self.isNodeConnected(node) else 0
-    status['readonly_nodes_count'] = len(self.__readonlyNodes)
-    for node in self.__readonlyNodes:
-        status['readonly_node_status_server_' + node.id] = 2 if self.isNodeConnected(node) else 0
-    status['log_len'] = len(self.__raftLog)
-    status['last_applied'] = self.raftLastApplied
-    status['commit_idx'] = self.raftCommitIndex
-    status['raft_term'] = self.raftCurrentTerm
-    status['next_node_idx_count'] = len(self.__raftNextIndex)
-    for node, idx in iteritems(self.__raftNextIndex):
-        status['next_node_idx_server_' + node.id] = idx
-    status['match_idx_count'] = len(self.__raftMatchIndex)
-    for node, idx in iteritems(self.__raftMatchIndex):
-        status['match_idx_server_' + node.id] = idx
-    status['leader_commit_idx'] = self.__leaderCommitIndex
-    status['uptime'] = int(monotonicTime() - self.__startTime)
-    status['self_code_version'] = self.__selfCodeVersion
-    status['enabled_code_version'] = self.__enabledCodeVersion
-    return status """

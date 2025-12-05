@@ -34,3 +34,9 @@ def get_addresses():
     partners = [n for i, n in enumerate(nodes) if i != args.id]
 
     return selfAddr, partners
+
+def get_selfId():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--id", type=int, required=True)
+    args = parser.parse_args()
+    return args.id
