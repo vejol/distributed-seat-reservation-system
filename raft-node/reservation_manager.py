@@ -9,7 +9,7 @@ ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, se
 TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
-    def __init__(self, selfNodeAddr, otherNodeAddrs):
+    def __init__(self, selfNodeAddr, otherNodeAddrs, on_seat_map_changed):
 
         # Select the latter journalFile setting to save snapshots to local memory
         conf = SyncObjConf(
@@ -23,6 +23,7 @@ class ReservationManager(SyncObj):
         self.__activeShowtimes: ActiveShowtimes = {
             1: {'a1': None, 'a2': None, 'a3': None, 'a4': None, 'a5': None, 'a6': None, 'b1': None, 'b2': None, 'b3': None, 'b4': None, 'b5': None, 'b6': None, 'c1': None, 'c2': None, 'c3': None, 'c4': None, 'c5': None, 'c6': None, 'd1': None, 'd2': None, 'd3': None, 'd4': None, 'd5': None, 'd6': None}
         }
+        self._on_seat_map_changed = on_seat_map_changed
 
     def getFullState(self):
         return self.__activeShowtimes
@@ -97,6 +98,7 @@ class ReservationManager(SyncObj):
             }
 
         self.__activeShowtimes[showtimeID][seatID] = userID
+        self._on_seat_map_changed(self)
 
         return {
             'success': True,
