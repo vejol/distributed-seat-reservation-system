@@ -38,7 +38,7 @@ def seat_map_changed(node):
     print('The seat map has been updated:')
     print_seat_map(node.getFullState()[1])
     print()
-    print("Reserve a seat by entering a seat name (e.g. a1)")
+    print("Reserve a seat by entering a seat name (e.g. a1) or use admin command is-leader")
 
 def run_console(node: ReservationManager, selfId: int):
     def print(*args, **kwargs):
@@ -56,11 +56,19 @@ def run_console(node: ReservationManager, selfId: int):
     time.sleep(0.1)
     print_seat_map(node.getFullState()[1])
     print()
-    print("Reserve a seat by entering a seat name (e.g. a1)")
+    print("Reserve a seat by entering a seat name (e.g. a1) or use admin command is-leader")
 
     while True:
         userInput = input().strip().lower()
-        response = node.reserveSeat(1, seatID=userInput, userID=1234, sync=True)
+        if userInput == "is-leader":
+            status = node.getStatus()
+            if status["leader"] == status["self"]:
+                print("This node is the leader")
+            else:
+                print("This node is a follower")
+            print("Reserve a seat by entering a seat name (e.g. a1) or use admin command is-leader")
+        else:
+            response = node.reserveSeat(1, seatID=userInput, userID=1234, sync=True)
         continue
 
         print(f'\n{response["message"]}')
