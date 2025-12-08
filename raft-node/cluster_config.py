@@ -4,24 +4,33 @@ from pathlib import Path
 import sys
 
 
-def get_addresses():
-    config_path = Path(__file__).resolve().parent / "config.json"
-    if not config_path.exists():
-        print(f"Config file not found: {config_path}")
-        sys.exit(1)
-    with open(config_path) as file:
-        config = json.load(file)
-
+def parse_args():
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--id", type=int, required=True)
     parser.add_argument(
         "--config",
         type=str,
         required=False,
         default="default",
-        help="the key of the configuration used in the config.json file",
+        help="the key used in config.json",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--prod",
+        action="store_true",
+        help="launch application in production mode without default showtimes set",
+    )
+
+    return parser.parse_args()
+
+
+def get_addresses(args):
+    config_path = Path(__file__).resolve().parent / "config.json"
+    if not config_path.exists():
+        print(f"Config file not found: {config_path}")
+        sys.exit(1)
+    with open(config_path) as file:
+        config = json.load(file)
 
     nodes = config[args.config]
 
@@ -34,9 +43,3 @@ def get_addresses():
     partners = [n for i, n in enumerate(nodes) if i != args.id]
 
     return selfAddr, partners
-
-def get_selfId():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--id", type=int, required=True)
-    args = parser.parse_args()
-    return args.id
