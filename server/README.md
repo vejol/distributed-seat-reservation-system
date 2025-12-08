@@ -12,8 +12,7 @@ This project includes a Flask server that provides RESTful APIs for the Distribu
    ```
 2. Run the Flask server:
    ```bash
-   export FLASK_APP=app.py
-   flask run
+   python -m server
    ```
 
 The server will start on `http://localhost:5000`.
