@@ -2,10 +2,10 @@ from pathlib import Path
 from pysyncobj import SyncObj, SyncObjConf, replicated
 from typing import TypedDict
 
-ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, seatID: userID ... } } 
-# available seats have userID = None
+ActiveShowtimes = dict[int, dict[str, int]]  # { showtimeID: { seatID: userID, seatID: userID ... } } 
+# Free seats have userID = None
 
-# used in addShowTime, something for the Gateway to mind
+# Used in addShowTime, something for the Gateway to mind
 TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
@@ -14,12 +14,12 @@ class ReservationManager(SyncObj):
         self,
         selfNodeAddr,
         otherNodeAddrs,
-        on_seat_map_changed,
+        on_seat_map_changed = None,
         initialShowTimes={},
-        diskJournal = False # Setting this to True will brake getLogs() below
+        diskLogsAndSnapshots = False  # Setting this to True will break getLogs() below
     ):
 
-        if diskJournal:
+        if diskLogsAndSnapshots:
             conf = SyncObjConf(
                 journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
                 fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
@@ -182,11 +182,11 @@ class ReservationManager(SyncObj):
 
         return availableSeats
 
-    # TODO: BROKEN when diskJournal = True
+    # TODO: BROKEN when diskLogsAndSnapshots = True
     def getLogs(self):
         return self._SyncObj__raftLog._MemoryJournal__journal
 
-    # Adapted from getStatus(). See syncobj.py from PySyncObj source code for details. Explanations from Ongaro & Ousterhout, 2014.
+    # Adapted from PySyncObj's getStatus(). See syncobj.py from PySyncObj source code for details. Explanations below from Ongaro & Ousterhout, 2014.
     def getCustomStatus(self):
         status = {}
         status['self'] = self.selfNode

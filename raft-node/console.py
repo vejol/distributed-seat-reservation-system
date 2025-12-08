@@ -5,7 +5,6 @@ import builtins
 import time
 import builtins
 
-
 def print_seat_map(seats: dict):
     # Let's define rows and columns
     rows = ["a", "b", "c", "d"]
@@ -76,6 +75,10 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                 if status['leader'] == status['self']:
                     print(f'This node ({status["self"]}) is the leader.')
                     print()
+                elif status['leader'] == None:
+                    print(f'This node ({status["self"]}) is a follower.')
+                    print(f'There is currently no leader.')
+                    print()
                 else:
                     print(f'This node ({status["self"]}) is a follower.')
                     print(f'The current leader is {status["leader"]}')
@@ -89,17 +92,16 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     print_seat_map(node.getFullState()[1])
                     print()
 
-
-    elif mode == 'prod':
-        print('--- Welcome to the Interactive Console! ---')
+    # TODO: Use seat map printing in the Interactive Dev Console
+    elif mode == 'dev':
+        print('--- Welcome to the Interactive Dev Console! ---')
         while True:
             print()
-            print('--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat\nget-showtimes\nget-state\nget-raw-logs (BROKEN)\nget-logs (BROKEN)\nget-node-status\nexit')
+            print('--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat\nget-showtimes\nget-state\nget-raw-logs (BETA)\nget-logs (BETA)\nget-node-status\nexit')
             print()
             print('Enter a command:')
             try:
                 command = input().strip().lower()
-
 
                 if command == 'admin':
                     while True:
@@ -177,8 +179,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                             commandGlobal = 'exit'
                             break
 
-
-                if command == 'reserve-seat':
+                elif command == 'reserve-seat':
                     while True:
                         print()
                         print('Who is reserving? Enter userID: (int | "cancel")')
@@ -235,7 +236,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                             commandGlobal = ''
                             break
                 
-                if command == 'cancel-seat':
+                elif command == 'cancel-seat':
                     while True:
                         availableShowtimes = node.getShowtimes()
                         print()
@@ -339,7 +340,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     # catch exits from inner loops
                     continue
 
-                elif command:
+                else:
                     print(f'Unknown command: "{command}"')
 
             except KeyboardInterrupt:
@@ -349,24 +350,14 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                 print(f"An error occurred: {e}")
                 break
 
-# Will this stay?
-""" def render_seat_map(rows: dict[str, dict[str, object]]) -> None:
-    # rows = { "A": {"A1": None, "A2": 123, ...}, "B": {...}, ... }
-    def seat_key(seat_id: str) -> int:
-        # lajittelee A1, A2, A10 numeron mukaan
-        num = ''.join(ch for ch in seat_id if ch.isdigit())
-        return int(num) if num else 0
-
-    for row_label in sorted(rows.keys()):  # rivit aakkosjärjestyksessä
-        seats = rows[row_label]
-        line = [row_label]  # rivin tunnus alkuun
-        for seat_id in sorted(seats.keys(), key=seat_key):
-            value = seats[seat_id]
-            reserved = bool(value)  # True/uid => varattu, None/False/0/"" => vapaa
-            line.append('[x]' if reserved else '[ ]')
-        print(' '.join(line)) """
-
-
-
-
-
+    # TODO: This is a mere skeleton
+    elif mode == 'prod':
+        while True:
+            try:
+                command = input().strip().lower()
+            except KeyboardInterrupt:
+                print("Exiting on interrupt.")
+                break
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                break

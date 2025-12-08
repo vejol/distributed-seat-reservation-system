@@ -18,7 +18,12 @@ def parse_args():
     parser.add_argument(
         "--prod",
         action="store_true",
-        help="launch application in production mode without default showtimes set",
+        help="launch application in production mode with logs/snapshots saved on disk",
+    )
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="launch application in development mode with the Interactive Dev Console and logs/snapshots saved in memory only"
     )
 
     return parser.parse_args()
