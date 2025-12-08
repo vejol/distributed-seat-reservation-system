@@ -83,6 +83,10 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                 print(f'{response["message"]}')
                 print()
 
+                if not response["success"]:
+                    seat_map_changed(node)
+                    print()
+
 
     elif mode == 'prod':
         print('--- Welcome to the Interactive Console! ---')
