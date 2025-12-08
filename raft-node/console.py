@@ -37,9 +37,11 @@ def seat_map_changed(node):
     status = node.getCustomStatus()
 
     print()
-    print('--- NEW LOG ENTRY COMMITTED TO THE STATE MACHINE ---')
+    print('+-------------------------+')
+    print('| NEW LOG ENTRY COMMITTED |')
+    print('+-------------------------+')
     print(f'Term: {status["raft_term"]}')
-    print('The seat map has been updated:')
+    print('Updated seat map:')
     print_seat_map(node.getFullState()[1])
     print()
 
@@ -84,7 +86,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                 print()
 
                 if not response["success"]:
-                    seat_map_changed(node)
+                    print_seat_map(node.getFullState()[1])
                     print()
 
 
