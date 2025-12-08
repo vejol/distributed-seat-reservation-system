@@ -8,7 +8,8 @@ def main():
     selfAddr, partners = get_addresses(args)
 
     if args.prod:  # Launch in production mode
-        node = ReservationManager(selfAddr, partners, seat_map_changed)
+        node = ReservationManager(selfAddr, partners, seat_map_changed, diskJournal=True)
+        run_console(node, args.id, mode='prod')
 
     else:  # Launch in demo mode
         initialShowTimes = {
@@ -42,7 +43,7 @@ def main():
         node = ReservationManager(
             selfAddr, partners, seat_map_changed, initialShowTimes
         )
-        run_console(node, args.id)
+        run_console(node, args.id, mode='demo')
 
 
 if __name__ == "__main__":

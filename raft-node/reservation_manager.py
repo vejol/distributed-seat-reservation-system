@@ -5,7 +5,7 @@ from typing import TypedDict
 ActiveShowtimes = dict[int, dict[str, int]] # { showtimeID: { seatID: userID, seatID: userID ... } } 
 # available seats have userID = None
 
-# used in addShowTime, something for Application Servers to mind
+# used in addShowTime, something for the Gateway to mind
 TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
 class ReservationManager(SyncObj):
@@ -15,16 +15,20 @@ class ReservationManager(SyncObj):
         selfNodeAddr,
         otherNodeAddrs,
         on_seat_map_changed,
-        initialShowTimes={}
+        initialShowTimes={},
+        diskJournal = False # Setting this to True will brake getLogs() below
     ):
-         
-        # Select the latter journalFile setting to save snapshots to local memory
-        conf = SyncObjConf(
-            journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
-            fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
-            logCompactionMinTime=60,  # take snapshot in every 60 seconds
-            logCompactionMinEntries=5,  # take snapshot in every 5 entries
-        )
+
+        if diskJournal:
+            conf = SyncObjConf(
+                journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
+                fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
+                logCompactionMinTime=60,  # take snapshot in every 60 seconds
+                logCompactionMinEntries=5,  # take snapshot in every 5 entries
+            )
+        else:
+            conf = SyncObjConf(journalFile = None)
+
         super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
 
         self.__activeShowtimes: ActiveShowtimes = initialShowTimes
@@ -178,11 +182,11 @@ class ReservationManager(SyncObj):
 
         return availableSeats
 
-    # TODO: BROKEN
+    # TODO: BROKEN when diskJournal = True
     def getLogs(self):
         return self._SyncObj__raftLog._MemoryJournal__journal
 
-    # Adapted from getStatus(). See syncobj.py from PySyncObj source code for details (or look below). Explanations from Ongaro & Ousterhout, 2014.
+    # Adapted from getStatus(). See syncobj.py from PySyncObj source code for details. Explanations from Ongaro & Ousterhout, 2014.
     def getCustomStatus(self):
         status = {}
         status['self'] = self.selfNode
@@ -209,8 +213,3 @@ class ReservationManager(SyncObj):
         path.mkdir(parents=True, exist_ok=True)
         safe_id = id.replace(":", "_")
         return str(path / f"{keyword}-{safe_id}.bin")
-
-# DEV NOTE: you can copy-paste the line below (taken from db.json) when using addShowtime
-# [{"row": "A","seats": 2},{"row": "B","seats": 2}]
-
-# self.__raftLog returns logs as a list
