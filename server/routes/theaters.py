@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from utils.db import load_db
+from ..utils.db import load_db
 
 theaters_bp = Blueprint('theaters', __name__)
 

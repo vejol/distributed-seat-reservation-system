@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from utils.db import load_db, save_db
+from ..utils.db import load_db, save_db
 from datetime import datetime, timedelta, timezone
 
 showtimes_bp = Blueprint('showtimes', __name__)
