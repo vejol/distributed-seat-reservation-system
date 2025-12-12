@@ -58,3 +58,4 @@ class PingPongServicer(pingpong_pb2_grpc.PingPongServicer):
         response_message = f"Pong! (received: '{request.message}', count: {count})"
         print(f"[LEADER] Sending: {response_message}")
         return pingpong_pb2.PongResponse(message=response_message)
+    
