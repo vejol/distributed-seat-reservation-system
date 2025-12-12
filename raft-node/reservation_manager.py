@@ -31,9 +31,17 @@ class ReservationManager(SyncObj):
 
         super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
 
+        self.__counter = 0
         self.__activeShowtimes: ActiveShowtimes = initialShowTimes
         self._on_seat_map_changed = on_seat_map_changed
 
+    def get_count(self):
+        return self.__counter
+    
+    @replicated
+    def _increment(self):
+        self.__counter += 1
+    
     def getFullState(self):
         return self.__activeShowtimes
 
