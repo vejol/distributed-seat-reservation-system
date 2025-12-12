@@ -7,19 +7,22 @@ from rpc import pingpong_pb2_grpc
 health_bp = Blueprint('health', __name__)
 
 # gRPC client connection
-channel = grpc.insecure_channel('localhost:50051')
-stub = pingpong_pb2_grpc.PingPongStub(channel)
+channel = grpc.insecure_channel('localhost:50001')
+ping_stub = pingpong_pb2_grpc.PingPongStub(channel)
+
+@health_bp.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'message': 'pong'}), 200
+
 
 @health_bp.route('/ping', methods=['GET'])
 def ping():
-    return jsonify({'message': 'pong'}), 200
-
-@health_bp.route('/ping/raft', methods=['GET'])
-def ping_raft():
+    """Ping endpoint for testing gRPC connection"""
     try:        
+        # Call gRPC service
         grpc_request = pingpong_pb2.PingRequest(message='Ping!')
-        grpc_response = stub.Ping(grpc_request)
-        
+        grpc_response = ping_stub.Ping(grpc_request)
+
         return jsonify({
             'success': True,
             'response': grpc_response.message

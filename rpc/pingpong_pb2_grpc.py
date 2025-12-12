@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import pingpong_pb2 as pingpong__pb2
+from . import pingpong_pb2 as pingpong__pb2
 
 GRPC_GENERATED_VERSION = '1.68.1'
 GRPC_VERSION = grpc.__version__
