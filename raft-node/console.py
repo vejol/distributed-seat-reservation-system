@@ -6,17 +6,17 @@ import time
 import threading
 
 def print_seat_map(seats: dict):
-    # Let's define rows and columns
+    # Define rows and columns
     rows = ["a", "b", "c", "d"]
     cols = [1, 2, 3, 4, 5, 6]
 
-    # Upper row numbers
+    # Print upper row numbers
     print("  ", end="")
     for c in cols:
         print(f"  {c}", end="")
     print()
 
-    # The actual places
+    # Print the seats
     for row in rows:
         row_label = row  
         print(f"{row_label}  ", end="")
@@ -46,19 +46,19 @@ def seat_map_changed(node):
 
 def run_console(node: ReservationManager, selfId: int, mode: str):
     def print(*args, **kwargs):
-        prefix = f'[N{selfId}] ' # 'N' for 'Node'
+        prefix = f'[N{selfId}] '  # 'N' for 'Node'
 
         sep = kwargs.get('sep', ' ')
 
         if args:
             builtins.print(prefix, end='')
             builtins.print(*args, **kwargs)
-        else: # print() outputs an empty line without the prefix
+        else:  # print() without args outputs an empty line without the prefix
             builtins.print(**kwargs)
 
     time.sleep(0.1)
 
-    commandGlobal = '' # This is used to exit nested loops after 'cancel' or successful operation
+    commandGlobal = ''  # This is used to exit nested loops after 'cancel' or successful operation
 
     if mode == 'demo':
         print_seat_map(node.getFullState()[1])
@@ -84,7 +84,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     print(f'The current leader is {status["leader"]}')
                     print()
             elif userInput == 'add-node':
-                done = threading.Event() # This object holds the status of the configuration change
+                done = threading.Event()  # This object holds the status of the configuration change
                 result_holder = {'result': None, 'error': None}
 
                 def on_add_node(result, error):
@@ -136,12 +136,11 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     print_seat_map(node.getFullState()[1])
                     print()
 
-    # TODO: Use seat map printing in the Interactive Dev Console
     elif mode == 'dev':
         print('--- Welcome to the Interactive Dev Console! ---')
         while True:
             print()
-            print('--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat\nget-showtimes\nget-state\nget-raw-logs (BETA)\nget-logs (BETA)\nget-node-status\nexit')
+            print('--- COMMANDS ---\nadmin\nreserve-seat\ncancel-seat\nget-showtimes\nget-state\nget-raw-logs\nget-logs\nget-node-status\nexit')
             print()
             print('Enter a command:')
             try:
@@ -166,7 +165,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                 try:
                                     showtimeID = int(adminInput)
                                     existingShowtimes = node.getShowtimes() 
-                                    if showtimeID not in list(existingShowtimes): # this line simulates an application server in the sense that identical verification is also later executed by reservation_manager.py
+                                    if showtimeID not in list(existingShowtimes):  # This condition simulates an Application Server in the sense that identical verification is also later executed by reservation_manager.py
                                         while True:
                                             print()
                                             print('Enter theater rows: (list[dict[str, int]] | "return" | "cancel") (you can copy-paste from db.json)')
@@ -182,7 +181,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                                 response = node.addShowtime(showtimeID, rows, sync=True)
                                                 print(f'{response["message"]}')
                                                 if response['success']:
-                                                    commandGlobal = 'cancel' # to return to admin menu
+                                                    commandGlobal = 'cancel'  # To return to admin menu
                                                     break
                                             except json.JSONDecodeError:
                                                 print('Invalid input.')
@@ -193,7 +192,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                 except ValueError as e:
                                     print(f'Invalid input. {e}')
                                     print()
-                                if commandGlobal == 'cancel': # canceled after entering showtimeID --> return to admin menu
+                                if commandGlobal == 'cancel':  # Canceled after entering showtimeID --> return to admin menu
                                     commandGlobal = ''
                                     break
 
@@ -264,7 +263,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                                 response = node.reserveSeat(showtimeID, seatID=userInput, userID=userID, sync=True)
                                                 print(f'{response["message"]}')
                                                 if response['success']:
-                                                    commandGlobal = 'cancel' # to return to user menu
+                                                    commandGlobal = 'cancel'  # To return to user menu
                                                     break
                                             except Exception as e:
                                                 print(f'Error: {type(e).__name__}: {e}')
@@ -272,11 +271,11 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                         print('Please select a showtime that exists in the state.')
                                 except ValueError as e:
                                     print(f'Invalid input. {e}')
-                                if commandGlobal == 'cancel': # canceled after entering showtimeID --> return to user menu
-                                    break # commandGlobal not edited because there is one more outer loop to exit
+                                if commandGlobal == 'cancel':  # Canceled after entering showtimeID --> return to user menu
+                                    break  # commandGlobal is not edited here because there is one more outer loop to exit
                         except ValueError:
                             print('Invalid input.')
-                        if commandGlobal == 'cancel': # canceled or success after entering userID --> return to user menu
+                        if commandGlobal == 'cancel':  # Canceled or success after entering userID --> return to user menu
                             commandGlobal = ''
                             break
                 
@@ -310,7 +309,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                         response = node.cancelSeat(showtimeID, seatID=userInput, sync=True)
                                         print(f'{response["message"]}')
                                         if response['success']:
-                                            commandGlobal = 'cancel' # to return to user menu
+                                            commandGlobal = 'cancel'  # To return to user menu
                                             break
                                     except Exception as e:
                                         print(f'Error: {type(e).__name__}: {e}')
@@ -318,7 +317,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                                 print('Please select a showtime that exists in the state.')
                         except ValueError as e:
                             print(f'Invalid input. {e}')
-                        if commandGlobal == 'cancel': # canceled or success after entering showtimeID --> return to user menu
+                        if commandGlobal == 'cancel':  # Canceled or success after entering showtimeID --> return to user menu
                             commandGlobal = ''
                             break
 
@@ -336,10 +335,13 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                         print(log)
 
                 elif command == 'get-logs':
+                    # PySyncObj apparently assigns the numbers alphabetically. 
+                    # Thus, if @replicated functions are added/removed in reservation_manager.py, this mapping will need to be updated.
                     FUNCTION_MAP = {
                         0: 'addShowtime',
+                        1: 'cancelSeat',
+                        2: 'removeShowtime',
                         3: 'reserveSeat'
-                        # TODO: Add other functions from reservation_manager.py. Note that the mapping above might be incorrect since the functions in reservation_manager.py have been reordered.
                     }
 
                     raw_log = node.getLogs()
@@ -355,14 +357,18 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                         
                         elif binary_data.startswith(b'\x00'):
                             try:
-                                decoded_data = pickle.loads(binary_data[1:]) # decoded_data is a 3-tuple
+                                decoded_data = pickle.loads(binary_data[1:])  # decoded_data is a 3-tuple
                                 function_name = FUNCTION_MAP.get(decoded_data[0], f'Unknown_ID_{decoded_data[0]}')
                                 if function_name == 'addShowtime': 
-                                    decoded_data = f'{function_name}{decoded_data[1]}' # addShowtime has the arguments in decoded_data[1]
+                                    decoded_data = f'{function_name}{decoded_data[1]}'  # addShowtime has the arguments in decoded_data[1]
+                                elif function_name == 'cancelSeat':
+                                    decoded_data = f'{function_name}({decoded_data[2]})'  # cancelSeat has the arguments in decoded_data[2]
+                                elif function_name == 'removeShowtime':
+                                    decoded_data = f'{function_name}({decoded_data[1][0]})'  # removeShowtime has the arguments as a 2-tuple in decoded_data[1] with the latter object None
                                 elif function_name == 'reserveSeat':
-                                    decoded_data = f'{function_name}({decoded_data[2]})' # reserveSeat has the arguments in decoded_data[2]
+                                    decoded_data = f'{function_name}({decoded_data[2]})'  # reserveSeat has the arguments as a 2-tuple in decoded_data[2]
                                 else:
-                                    decoded_data = f'{function_name}({decoded_data[1]})({decoded_data[2]})'
+                                    decoded_data = f'{function_name}||({decoded_data[1]})||({decoded_data[2]})'
                             except Exception as e:
                                 decoded_data = f'<Corrupt Data: {e}>'
                         
@@ -376,12 +382,12 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     print()
                     print(status)
 
-                elif command == 'exit' or commandGlobal == 'exit': # the latter activated when admin exits
+                elif command == 'exit' or commandGlobal == 'exit':  # The latter activated when an admin exits
                     print("Exiting.")
                     break
             
+                # Catch exits from inner loops
                 elif command == 'return' or command == 'reserve-seat':
-                    # catch exits from inner loops
                     continue
 
                 else:
@@ -394,7 +400,6 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                 print(f"An error occurred: {e}")
                 break
 
-    # TODO: This is a mere skeleton
     elif mode == 'prod':
         while True:
             try:

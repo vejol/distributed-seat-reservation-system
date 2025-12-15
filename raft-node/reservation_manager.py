@@ -5,16 +5,17 @@ from typing import TypedDict
 ActiveShowtimes = dict[int, dict[str, int]]  # { showtimeID: { seatID: userID, seatID: userID ... } } 
 # Free seats have userID = None
 
-# Used in addShowTime, something for the Gateway to mind
+# Used in addShowTime, something for the Gateway/Server to mind
 TheaterRows = TypedDict('TheaterRows', {'row': str, 'seats': int})
 
+# NOTE: If @replicated functions are added/removed, FUNCTION_MAP in console.py needs to be updated manually!
 class ReservationManager(SyncObj):
 
     def __init__(
         self,
         selfNodeAddr,
         otherNodeAddrs,
-        on_seat_map_changed = None,
+        on_seat_map_changed = lambda *args, **kwargs: None,
         initialShowTimes={},
         diskLogsAndSnapshots = False  # Setting this to True will break getLogs() below
     ):
@@ -23,14 +24,14 @@ class ReservationManager(SyncObj):
             conf = SyncObjConf(
                 journalFile=self._generateUniqueFileName("journal", selfNodeAddr),
                 fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
-                logCompactionMinTime=60,  # take snapshot in every 60 seconds
-                logCompactionMinEntries=5,  # take snapshot in every 5 entries
-                dynamicMembershipChange=True # Allows to change raft configuration dynamically
+                logCompactionMinTime=60,  # Take snapshot in every 60 seconds
+                logCompactionMinEntries=5,  # Take snapshot in every 5 entries
+                dynamicMembershipChange=True  # Allow changing Raft configuration dynamically
             )
         else:
             conf = SyncObjConf(
                 journalFile=None, 
-                dynamicMembershipChange=True # Allows to change raft configuration dynamically
+                dynamicMembershipChange=True  # Allow changing Raft configuration dynamically
             )  
 
         super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
@@ -186,7 +187,8 @@ class ReservationManager(SyncObj):
 
         return availableSeats
 
-    # TODO: BROKEN when diskLogsAndSnapshots = True
+    # NOTE: Works only when diskLogsAndSnapshots = False i.e. in development mode (see main.py)
+    # NOTE: If @replicated functions are added/removed, FUNCTION_MAP in console.py needs to be updated manually!
     def getLogs(self):
         return self._SyncObj__raftLog._MemoryJournal__journal
 
@@ -199,14 +201,14 @@ class ReservationManager(SyncObj):
         status['has_quorum'] = self.hasQuorum
         status['partner_nodes'] = self._SyncObj__otherNodes
         status['partner_nodes_count'] = len(self._SyncObj__otherNodes)
-        status['raft_term'] = self.raftCurrentTerm # latest term server has seen
-        status['commit_idx'] = self.raftCommitIndex # index of highest log entry known to be committed
-        status['last_applied'] = self.raftLastApplied # index of highest log entry applied to state machine
+        status['raft_term'] = self.raftCurrentTerm  # latest term server has seen
+        status['commit_idx'] = self.raftCommitIndex  # index of highest log entry known to be committed
+        status['last_applied'] = self.raftLastApplied  # index of highest log entry applied to state machine
         for node, idx in self._SyncObj__raftNextIndex.items():
-            status['next_node_idx_server_' + node.id] = idx # for each server, index of the next log entry to send to that server
+            status['next_node_idx_server_' + node.id] = idx  # for each server, index of the next log entry to send to that server
         for node, idx in self._SyncObj__raftMatchIndex.items():
-            status['match_idx_server_' + node.id] = idx # for each server, index of highest log entry known to be replicated on server
-        status['leader_commit_idx'] = self._SyncObj__leaderCommitIndex # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
+            status['match_idx_server_' + node.id] = idx  # for each server, index of highest log entry known to be replicated on server
+        status['leader_commit_idx'] = self._SyncObj__leaderCommitIndex  # FOLLOWERS: If leader_commit_idx > commit_idx, set commit_idx min(leader_commit_idx, index of last new entry)
         return(status)
 
     # Every node needs unique file names for journal and dump files.
