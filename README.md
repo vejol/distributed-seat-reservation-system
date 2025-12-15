@@ -40,7 +40,7 @@ Below are the steps for running three Raft nodes locally on your machine.
 
 ---
 
-## 1. Install Python
+### 1. Install Python
 
 1. Make sure you have **Python 3.10.12** installed.
    - Other Python 3.x versions may also work, but the application has been tested specifically with 3.10.12.
@@ -49,7 +49,7 @@ Below are the steps for running three Raft nodes locally on your machine.
 
 ---
 
-## 2. Clone the Repository
+### 2. Clone the Repository
 
 1. Clone this repository to your local machine.
    - If you are a collaborator, you can use SSH:  
@@ -59,7 +59,7 @@ Below are the steps for running three Raft nodes locally on your machine.
 
 ---
 
-## 3. Set Up a Python Virtual Environment
+### 3. Set Up a Python Virtual Environment
 
 1. Create a virtual environment:  
    `python3 -m venv raft-node/venv`
@@ -71,7 +71,7 @@ Below are the steps for running three Raft nodes locally on your machine.
 
 ---
 
-## 4. Running the Nodes
+### 4. Running the Nodes
 
 To run three nodes with a shared replicated state:
 
@@ -86,12 +86,12 @@ To run three nodes with a shared replicated state:
    - Terminal 3:  
      `python3 raft-node/main.py --id 2`
 
-### Required flag: `--id`
+#### Required flag: `--id`
 
 The `--id` flag is **mandatory**. It tells the program which node this process represents.  
 The value corresponds to the index of the node in the `config.json` file.
 
-### Optional flags:
+#### Optional flags:
 
 1. `--config`
 
