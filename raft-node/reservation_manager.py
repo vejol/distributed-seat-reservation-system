@@ -25,9 +25,13 @@ class ReservationManager(SyncObj):
                 fullDumpFile=self._generateUniqueFileName("dump", selfNodeAddr),
                 logCompactionMinTime=60,  # take snapshot in every 60 seconds
                 logCompactionMinEntries=5,  # take snapshot in every 5 entries
+                dynamicMembershipChange=True # Allows to change raft configuration dynamically
             )
         else:
-            conf = SyncObjConf(journalFile = None)
+            conf = SyncObjConf(
+                journalFile=None, 
+                dynamicMembershipChange=True # Allows to change raft configuration dynamically
+            )  
 
         super(ReservationManager, self).__init__(selfNodeAddr, otherNodeAddrs, conf)
 

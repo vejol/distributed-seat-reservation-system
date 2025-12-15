@@ -3,7 +3,7 @@ import json
 import pickle
 import builtins
 import time
-import builtins
+import threading
 
 def print_seat_map(seats: dict):
     # Let's define rows and columns
@@ -64,7 +64,7 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
         print_seat_map(node.getFullState()[1])
         print()
         while True:
-            print('Reserve a seat by entering a seat name (e.g. "a1") or use admin command "is-leader".')
+            print('Reserve a seat by entering a seat name (e.g. "a1") (Other commands: is-leader, add-node, remove-node).')
             userInput = input().strip().lower()
             print()
             print(f'USER INPUT RECEIVED: {userInput}')
@@ -83,6 +83,50 @@ def run_console(node: ReservationManager, selfId: int, mode: str):
                     print(f'This node ({status["self"]}) is a follower.')
                     print(f'The current leader is {status["leader"]}')
                     print()
+            elif userInput == 'add-node':
+                done = threading.Event() # This object holds the status of the configuration change
+                result_holder = {'result': None, 'error': None}
+
+                def on_add_node(result, error):
+                    result_holder['result'] = result
+                    result_holder['error'] = error
+                    done.set()
+
+                print()
+                print('Enter the address of the new node (e.g. localhost:6003)')
+                nodeInput = input().strip().lower()
+                node.addNodeToCluster(nodeInput, on_add_node)
+
+                print('Waiting for node to join the cluster...')
+                if not done.wait(timeout=60):
+                    print('Timed out while adding node.')
+                elif result_holder['error']:
+                    print('Failed to add node:', result_holder['error'])
+                else:
+                    print('New node was added successfully to the cluster!')
+                continue
+            elif userInput == 'remove-node':
+                done = threading.Event()
+                result_holder = {'result': None, 'error': None}
+
+                def on_remove_node(result, error):
+                    result_holder['result'] = result
+                    result_holder['error'] = error
+                    done.set()
+
+                print()
+                print('Enter the address of the node to remove (e.g. localhost:6003)')
+                nodeInput = input().strip().lower()
+                node.removeNodeFromCluster(nodeInput, on_remove_node)
+
+                print('Waiting for node to be removed from the cluster...')
+                if not done.wait(timeout=15):
+                    print('Timed out while removing node.')
+                elif result_holder['error']:
+                    print('Failed to remove node:', result_holder['error'])
+                else:
+                    print('Node was removed successfully from the cluster!')
+                continue
             else:
                 response = node.reserveSeat(1, seatID=userInput, userID=1234, sync=True)
                 print(f'{response["message"]}')

@@ -1,5 +1,18 @@
 # Distributed Seat Reservation System
 
+## Table of Contents
+
+- [How to Run the Raft Nodes Locally](#how-to-run-the-raft-nodes-locally)
+  - [1. Install Python](#1-install-python)
+  - [2. Clone the Repository](#2-clone-the-repository)
+  - [3. Set Up a Python Virtual Environment](#3-set-up-a-python-virtual-environment)
+  - [4. Running the Nodes](#4-running-the-nodes)
+    - [Required flag: --id](#required-flag-id)
+    - [Optional flag: --config](#optional-flag-config)
+- [Dynamically Changing the Raft Configuration](#dynamically-changing-the-raft-configuration)
+  - [Adding a Node](#adding-a-node)
+  - [Removing a Node](#removing-a-node)
+
 ## How to Run the Raft Nodes Locally
 
 This project includes a simple distributed seat reservation system implemented with the
@@ -74,3 +87,58 @@ Example:
 - Terminal 1:
   `python3 raft-node/main.py --id 0 --config staging`
 - etc.
+
+## Dynamically Changing the Raft Configuration
+
+The application supports dynamic Raft configuration changes, meaning nodes can be added or removed at runtime. Our implementation leverages the existing PySyncObj methods `addNodeToCluster` and `removeNodeFromCluster`.
+
+### Adding a Node
+
+Adding a new node is done via the `add-node` command in `console.py`. The command prompts for the new node’s address (host:port). The console then attempts to add the node to the configuration and waits for the operation to complete. The result is printed once available, and the operation has a 60-second timeout.
+
+For example, to add a fourth node to the default three-node configuration running on localhost:
+
+1. Start the nodes normally:
+
+   - python3 ./raft-node/main.py --id 0
+   - python3 ./raft-node/main.py --id 1
+   - python3 ./raft-node/main.py --id 2
+
+2. Modify `config.json` to reflect the new configuration by adding the new node’s address. The updated `config.json` might look like:
+
+   ```json
+   {
+     "default": [
+       "localhost:6000",
+       "localhost:6001",
+       "localhost:6002",
+       "localhost:6003"
+     ]
+   }
+   ```
+
+3. Run the `add-node` command in any console.
+
+4. When prompted, enter the new node’s address in the form `localhost:6003`.
+
+5. Start the new node in a separate console:
+
+   - python3 ./raft-node/main.py --id 3
+
+### Removing a Node
+
+To remove an existing node, use the `remove-node` command in `console.py`. The console prompts for the node’s address (host:port), submits the configuration change, and waits for the result (15-second timeout).
+
+Example: removing `localhost:6003` from a four-node cluster:
+
+1. Run the `remove-node` command in any console.
+2. When prompted, enter `localhost:6003`.
+3. Wait for the success message or an error/timeout.
+4. Stop the removed node’s process (e.g., press Ctrl+C in its terminal).
+5. Update `config.json` to reflect the new configuration by removing the node’s address. For example:
+
+   ```json
+   {
+     "default": ["localhost:6000", "localhost:6001", "localhost:6002"]
+   }
+   ```
