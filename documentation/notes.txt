@@ -1,0 +1,8 @@
+# Terminal 1 - Node 1
+python raft-node/main.py 50051 4321 localhost:4322:50052 localhost:4323:50053
+
+# Terminal 2 - Node 2  
+python raft-node/main.py 50052 4322 localhost:4321:50051 localhost:4323:50053
+
+# Terminal 3 - Node 3
+python raft-node/main.py 50053 4323 localhost:4321:50051 localhost:4322:50052
