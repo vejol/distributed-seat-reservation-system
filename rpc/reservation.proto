@@ -3,7 +3,7 @@ syntax = "proto3";
 package reservation;
 
 // Service definition for seat reservation operations
-service ReservationService {
+service Reservation {
     rpc ReserveSeat(ReserveSeatRequest) returns (ReserveSeatResponse);
     rpc CancelSeat(CancelSeatRequest) returns (CancelSeatResponse);
     rpc GetAvailableSeats(GetAvailableSeatsRequest) returns (GetAvailableSeatsResponse);

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package showtimes;
 
-service ShowtimeService {
+service Showtime {
     rpc AddShowtime(AddShowtimeRequest) returns (AddShowtimeResponse);
     rpc RemoveShowtime(RemoveShowtimeRequest) returns (RemoveShowtimeResponse);
     rpc GetShowtimes(GetShowtimesRequest) returns (GetShowtimesResponse);
