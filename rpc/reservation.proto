@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package reservation;
+
+// Service definition for seat reservation operations
+service ReservationService {
+    rpc ReserveSeat(ReserveSeatRequest) returns (ReserveSeatResponse);
+    rpc CancelSeat(CancelSeatRequest) returns (CancelSeatResponse);
+    rpc GetAvailableSeats(GetAvailableSeatsRequest) returns (GetAvailableSeatsResponse);
+    rpc GetReservedSeats(GetReservedSeatsRequest) returns (GetReservedSeatsResponse);
+}
+
+// Reserve seat messages
+message ReserveSeatRequest {
+    int32 showtime_id = 1;
+    string seat_id = 2;
+    int32 user_id = 3;
+}
+
+message ReserveSeatResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Cancel seat messages
+message CancelSeatRequest {
+    int32 showtime_id = 1;
+    string seat_id = 2;
+}
+
+message CancelSeatResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Get available seats messages
+message GetAvailableSeatsRequest {
+    int32 showtime_id = 1;
+}
+
+message GetAvailableSeatsResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string seat_ids = 3;
+}
+
+// Get reserved seats messages
+message GetReservedSeatsRequest {
+    int32 showtime_id = 1;
+}
+
+message GetReservedSeatsResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string seat_ids = 3;
+}

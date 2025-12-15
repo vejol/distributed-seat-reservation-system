@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package showtimes;
+
+service ShowtimeService {
+    rpc AddShowtime(AddShowtimeRequest) returns (AddShowtimeResponse);
+    rpc RemoveShowtime(RemoveShowtimeRequest) returns (RemoveShowtimeResponse);
+    rpc GetShowtimes(GetShowtimesRequest) returns (GetShowtimesResponse);
+}
+
+message TheaterRow {
+    string row = 1;
+    int32 seats = 2;
+}
+
+message AddShowtimeRequest {
+    int32 showtime_id = 1;
+    repeated TheaterRow rows = 2;
+}
+
+message AddShowtimeResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message RemoveShowtimeRequest {
+    int32 showtime_id = 1;
+}
+
+message RemoveShowtimeResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetShowtimesRequest {
+    // Empty - returns all showtimes
+}
+
+message GetShowtimesResponse {
+    repeated int32 showtime_ids = 1;
+}
